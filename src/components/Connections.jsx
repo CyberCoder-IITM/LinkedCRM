@@ -436,7 +436,7 @@ export default function Connections({
             </tr>
           </thead>
           <tbody>
-            {filtered.slice(0, 200).map((c) => {
+            {filtered.slice(0, 500).map((c) => {
               const score = scoreConnection(c);
               const phase = PHASES[c.phase] || PHASES.not_started;
               return (
@@ -614,7 +614,7 @@ export default function Connections({
             )}
           </tbody>
         </table>
-        {filtered.length > 200 && (
+        {filtered.length > 500 && (
           <div
             style={{
               padding: "12px 16px",
