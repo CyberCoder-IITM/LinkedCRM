@@ -24,6 +24,8 @@ export default function Connections({
   const [sortBy, setSortBy] = useState("score");
   const [sortDir, setSortDir] = useState("desc");
   const [showAdd, setShowAdd] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 500;
   const [form, setForm] = useState({
     name: "",
     company: "",
@@ -149,13 +151,19 @@ export default function Connections({
           <input
             placeholder="Search by name or company..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             style={{ width: "100%", paddingLeft: 36 }}
           />
         </div>
         <select
           value={filterRole}
-          onChange={(e) => setFilterRole(e.target.value)}
+          onChange={(e) => {
+            setFilterRole(e.target.value);
+            setPage(1);
+          }}
           style={{ width: 150 }}
         >
           <option value="">All Roles</option>
@@ -167,7 +175,10 @@ export default function Connections({
         </select>
         <select
           value={filterPhase}
-          onChange={(e) => setFilterPhase(e.target.value)}
+          onChange={(e) => {
+            setFilterPhase(e.target.value);
+            setPage(1);
+          }}
           style={{ width: 160 }}
         >
           <option value="">All Phases</option>
@@ -436,166 +447,176 @@ export default function Connections({
             </tr>
           </thead>
           <tbody>
-            {filtered.slice(0, 500).map((c) => {
-              const score = scoreConnection(c);
-              const phase = PHASES[c.phase] || PHASES.not_started;
-              return (
-                <tr
-                  key={c.id}
-                  onClick={() => onSelect(c)}
-                  style={{
-                    borderBottom: "1px solid #1a1a2a",
-                    cursor: "pointer",
-                    transition: "background 0.1s",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = "#15151f")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.background = "transparent")
-                  }
-                >
-                  <td style={{ padding: "12px 16px" }}>
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 10 }}
-                    >
+            {filtered
+              .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+              .map((c) => {
+                const score = scoreConnection(c);
+                const phase = PHASES[c.phase] || PHASES.not_started;
+                return (
+                  <tr
+                    key={c.id}
+                    onClick={() => onSelect(c)}
+                    style={{
+                      borderBottom: "1px solid #1a1a2a",
+                      cursor: "pointer",
+                      transition: "background 0.1s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background = "#15151f")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "transparent")
+                    }
+                  >
+                    <td style={{ padding: "12px 16px" }}>
                       <div
                         style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: "50%",
-                          background: "#1e1e3a",
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: 11,
-                          fontWeight: 600,
-                          color: "#4f6ef7",
-                          flexShrink: 0,
+                          gap: 10,
                         }}
                       >
-                        {c.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .slice(0, 2)
-                          .toUpperCase()}
-                      </div>
-                      <div>
                         <div
                           style={{
-                            fontSize: 14,
-                            fontWeight: 500,
-                            color: "#e8e8f0",
+                            width: 32,
+                            height: 32,
+                            borderRadius: "50%",
+                            background: "#1e1e3a",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: "#4f6ef7",
+                            flexShrink: 0,
                           }}
                         >
-                          {c.name}
+                          {c.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase()}
                         </div>
-                        {c.email && (
-                          <div style={{ fontSize: 11, color: "#555" }}>
-                            {c.email}
+                        <div>
+                          <div
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 500,
+                              color: "#e8e8f0",
+                            }}
+                          >
+                            {c.name}
                           </div>
-                        )}
+                          {c.email && (
+                            <div style={{ fontSize: 11, color: "#555" }}>
+                              {c.email}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td
-                    style={{
-                      padding: "12px 16px",
-                      fontSize: 13,
-                      color: "#aaa",
-                      maxWidth: 160,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {c.company || "—"}
-                  </td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <span
+                    </td>
+                    <td
                       style={{
-                        fontSize: 11,
-                        background: "#1e1e2e",
-                        border: "1px solid #2a2a3a",
-                        borderRadius: 20,
-                        padding: "3px 10px",
-                        color: "#888",
+                        padding: "12px 16px",
+                        fontSize: 13,
+                        color: "#aaa",
+                        maxWidth: 160,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
                       }}
                     >
-                      {c.roleType || "Other"}
-                    </span>
-                  </td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        background: phase.color + "22",
-                        border: `1px solid ${phase.color}44`,
-                        borderRadius: 20,
-                        padding: "3px 10px",
-                        color: phase.color,
-                      }}
-                    >
-                      {phase.label}
-                    </span>
-                  </td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 8 }}
-                    >
+                      {c.company || "—"}
+                    </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          background: "#1e1e2e",
+                          border: "1px solid #2a2a3a",
+                          borderRadius: 20,
+                          padding: "3px 10px",
+                          color: "#888",
+                        }}
+                      >
+                        {c.roleType || "Other"}
+                      </span>
+                    </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          background: phase.color + "22",
+                          border: `1px solid ${phase.color}44`,
+                          borderRadius: 20,
+                          padding: "3px 10px",
+                          color: phase.color,
+                        }}
+                      >
+                        {phase.label}
+                      </span>
+                    </td>
+                    <td style={{ padding: "12px 16px" }}>
                       <div
                         style={{
-                          width: 48,
-                          height: 4,
-                          background: "#1e1e2e",
-                          borderRadius: 2,
-                          overflow: "hidden",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
                         }}
                       >
                         <div
                           style={{
-                            width: `${score}%`,
-                            height: "100%",
-                            background:
+                            width: 48,
+                            height: 4,
+                            background: "#1e1e2e",
+                            borderRadius: 2,
+                            overflow: "hidden",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: `${score}%`,
+                              height: "100%",
+                              background:
+                                score >= 70
+                                  ? "#22c55e"
+                                  : score >= 40
+                                    ? "#f7a94f"
+                                    : "#ef4444",
+                              borderRadius: 2,
+                            }}
+                          />
+                        </div>
+                        <span
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color:
                               score >= 70
                                 ? "#22c55e"
                                 : score >= 40
                                   ? "#f7a94f"
                                   : "#ef4444",
-                            borderRadius: 2,
+                            fontFamily: "Syne",
                           }}
-                        />
+                        >
+                          {score}
+                        </span>
                       </div>
-                      <span
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color:
-                            score >= 70
-                              ? "#22c55e"
-                              : score >= 40
-                                ? "#f7a94f"
-                                : "#ef4444",
-                          fontFamily: "Syne",
-                        }}
-                      >
-                        {score}
-                      </span>
-                    </div>
-                  </td>
-                  <td
-                    style={{
-                      padding: "12px 16px",
-                      fontSize: 13,
-                      color: "#555",
-                    }}
-                  >
-                    {c.messages?.length || 0}
-                  </td>
-                </tr>
-              );
-            })}
+                    </td>
+                    <td
+                      style={{
+                        padding: "12px 16px",
+                        fontSize: 13,
+                        color: "#555",
+                      }}
+                    >
+                      {c.messages?.length || 0}
+                    </td>
+                  </tr>
+                );
+              })}
             {filtered.length === 0 && (
               <tr>
                 <td
@@ -614,16 +635,63 @@ export default function Connections({
             )}
           </tbody>
         </table>
-        {filtered.length > 500 && (
+        {filtered.length > PAGE_SIZE && (
           <div
             style={{
               padding: "12px 16px",
-              fontSize: 12,
-              color: "#555",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
               borderTop: "1px solid #1a1a2a",
             }}
           >
-            Showing 200 of {filtered.length}. Use search/filters to narrow down.
+            <span style={{ fontSize: 12, color: "#555" }}>
+              Showing {Math.min(page * PAGE_SIZE, filtered.length)} of{" "}
+              {filtered.length}
+            </span>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                style={{
+                  background: "#1e1e2e",
+                  border: "1px solid #2a2a3a",
+                  borderRadius: 6,
+                  padding: "4px 12px",
+                  color: page === 1 ? "#444" : "#aaa",
+                  cursor: page === 1 ? "default" : "pointer",
+                }}
+              >
+                Prev
+              </button>
+              <span style={{ fontSize: 12, color: "#666", padding: "4px 8px" }}>
+                Page {page} of {Math.ceil(filtered.length / PAGE_SIZE)}
+              </span>
+              <button
+                onClick={() =>
+                  setPage((p) =>
+                    Math.min(Math.ceil(filtered.length / PAGE_SIZE), p + 1),
+                  )
+                }
+                disabled={page === Math.ceil(filtered.length / PAGE_SIZE)}
+                style={{
+                  background: "#1e1e2e",
+                  border: "1px solid #2a2a3a",
+                  borderRadius: 6,
+                  padding: "4px 12px",
+                  color:
+                    page === Math.ceil(filtered.length / PAGE_SIZE)
+                      ? "#444"
+                      : "#aaa",
+                  cursor:
+                    page === Math.ceil(filtered.length / PAGE_SIZE)
+                      ? "default"
+                      : "pointer",
+                }}
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </div>
